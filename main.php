@@ -14,3 +14,14 @@ use ChrisCohen\Scraper\Scraper;
 require 'vendor/autoload.php';
 
 $scraper = new Scraper('https://videx.comesconnected.com');
+$scraper->scrape();
+
+// Check for a failure in the HTTP request.
+if (!$scraper->succeeded()) {
+    $code = $scraper->getResponse()->getStatusCode();
+    throw new HttpException(sprintf(
+        'Could not scrape %s - received status code %d',
+        $scraper->getUrl(),
+        $code
+    ));
+}

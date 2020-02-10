@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace ChrisCohen\Scraper;
 
+use ChrisCohen\Entity\Package;
 use Goutte\Client;
 use Symfony\Component\BrowserKit\Response;
 use Symfony\Component\DomCrawler\Crawler;
@@ -46,6 +47,11 @@ class Scraper
      * @var Crawler
      */
     protected $crawler;
+
+    /**
+     * @var Package[]
+     */
+    protected $packages = [];
 
     /**
      * Scraper constructor.
@@ -109,9 +115,42 @@ class Scraper
         return $this->crawler;
     }
 
-    protected function setCrawler(Crawler $crawler): void
+    public function setCrawler(Crawler $crawler): void
     {
         $this->crawler = $crawler;
+    }
+
+    public function getPackages(): array
+    {
+        return $this->packages;
+    }
+
+    /**
+     * No array type checking in PHP yet, so we'll implement it ourselves.
+     *
+     * @param Package[] $packages
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function setPackages(array $packages): void
+    {
+        foreach ($packages as $package) {
+            if (!($package instanceof Package)) {
+                throw new \InvalidArgumentException('Only arrays of Package entities may be passed to setPackages()');
+            }
+        }
+
+        $this->packages = $packages;
+    }
+
+    public function addPackage(Package $package): void
+    {
+        $this->packages[] = $package;
+    }
+
+    public function clearPackages(): void
+    {
+        $this->packages = [];
     }
 
     public function scrape(): Response
@@ -126,5 +165,57 @@ class Scraper
         $this->setResponse($response);
 
         return $response;
+    }
+
+    /**
+     * Determine if the last scrape() succeeded.
+     *
+     * Note we are using only status code 200 to indicate a success. There are other 2xx codes that might be considered
+     * a success, but for the purposes of this exercise, this will be sufficient.
+     *
+     * @return bool
+     */
+    public function succeeded(): bool
+    {
+        return $this->getResponse()->getStatusCode() === 200;
+    }
+
+    public function scrapePackages(): ?array
+    {
+        // Return null if the HTTP request has not yet been made.
+        if (!$this->succeeded()) {
+            return null;
+        }
+
+        $packages = [];
+
+        // Loop through each "package" DOM element on the page and process it. Since we are using a closure here, we
+        // will make sure $packages is available inside the closure so we can retrieve data from it.
+        $this->getCrawler()->filter('div.package')->each(function ($element) use ($packages) {
+            $package = new Package();
+
+            /** @var Crawler $element */
+            $package->setTitle($element->filter('div.header > h3')->text());
+            $package->setDescription($element->filter('div.package-name')->text());
+
+            $price = $package->getPriceFromString($element->filter('div.package-price > span.price-big')->text());
+
+            // Check that $price is not null before we set a price for the package.
+            if ($price) {
+                $package->setPrice($price);
+            }
+
+            $discount = $package->getPriceFromString($element->filter('div.package-price > p')->text());
+
+            // Check that $discount is not null before we set a discount on the package.
+            if ($discount) {
+                $package->setDiscount($discount);
+            }
+
+            $packages[] = $package;
+        });
+
+        $this->setPackages($packages);
+        return $packages;
     }
 }
