@@ -25,3 +25,14 @@ if (!$scraper->succeeded()) {
         $code
     ));
 }
+
+// Find packages on the page.
+$packages = $scraper->scrapePackages();
+
+$json = [];
+
+foreach ($packages as $package) {
+    $json[] = $package->toJson();
+}
+
+print json_encode($json);
