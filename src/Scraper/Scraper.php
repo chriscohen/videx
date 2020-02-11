@@ -198,17 +198,20 @@ class Scraper
             $package = new Package();
 
             /** @var Crawler $element */
-            $package->setTitle($element->filter('div.header > h3')->text());
-            $package->setDescription($element->filter('div.package-name')->text());
+            $package->setTitle($this->getInnerContent($element, 'div.header > h3'));
+            $package->setDescription($this->getInnerContent($element, 'div.package-name', 'html'));
 
-            $price = $package->getPriceFromString($element->filter('div.package-price > span.price-big')->text());
+            $price = $package->getPriceFromString($this->getInnerContent(
+                $element,
+                'div.package-price > span.price-big'
+            ));
 
             // Check that $price is not null before we set a price for the package.
             if ($price) {
                 $package->setPrice($price);
             }
 
-            $discount = $package->getPriceFromString($element->filter('div.package-price > p')->text());
+            $discount = $package->getPriceFromString($this->getInnerContent($element, 'div.package-price > p'));
 
             // Check that $discount is not null before we set a discount on the package.
             if ($discount) {
@@ -220,5 +223,30 @@ class Scraper
 
         $this->setPackages($packages);
         return $packages;
+    }
+
+    /**
+     * Attempt to get the inner HTML or text from a specific filtered place within the input Crawler.
+     *
+     * @param Crawler $element
+     * @param string $filter
+     * @param string $method
+     * @return string
+     */
+    public function getInnerContent(Crawler $element, string $filter, string $method = 'text'): string
+    {
+        try {
+            $result = $element->filter($filter);
+
+            switch ($method) {
+                case 'text':
+                    return $result->text();
+
+                case 'html':
+                    return $result->html();
+            }
+        } catch (\InvalidArgumentException $e) {
+            return '';
+        }
     }
 }
