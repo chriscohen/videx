@@ -180,6 +180,9 @@ class Scraper
         return $this->getResponse()->getStatusCode() === 200;
     }
 
+    /**
+     * @return Package[]|null
+     */
     public function scrapePackages(): ?array
     {
         // Return null if the HTTP request has not yet been made.
