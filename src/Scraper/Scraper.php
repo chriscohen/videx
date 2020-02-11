@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace ChrisCohen\Scraper;
 
-use ChrisCohen\Entity\Package;
+use ChrisCohen\Model\Package;
 use Goutte\Client;
 use Symfony\Component\BrowserKit\Response;
 use Symfony\Component\DomCrawler\Crawler;

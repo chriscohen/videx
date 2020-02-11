@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ChrisCohen\Entity;
+namespace ChrisCohen\Model;
 
 class Package
 {
