@@ -13,6 +13,7 @@ use ChrisCohen\Model\Package;
 use Goutte\Client;
 use Symfony\Component\BrowserKit\Response;
 use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\HttpClient\Exception\TransportException;
 
 class Scraper
 {
@@ -153,11 +154,15 @@ class Scraper
         $this->packages = [];
     }
 
-    public function scrape(): Response
+    public function scrape(): ?Response
     {
         // Perform the HTTP request.
-        $crawler = $this->getClient()->request($this->getMethod(), $this->getUrl());
-        $this->setCrawler($crawler);
+        try {
+            $crawler = $this->getClient()->request($this->getMethod(), $this->getUrl());
+            $this->setCrawler($crawler);
+        } catch (TransportException $e) {
+            return null;
+        }
 
         // Update the HTTP response. Needs type hinting due to ambiguous docs in BrowserKit.
         /** @var Response $response */
@@ -177,7 +182,11 @@ class Scraper
      */
     public function succeeded(): bool
     {
-        return $this->getResponse()->getStatusCode() === 200;
+        if (!empty($this->getResponse())) {
+            return $this->getResponse()->getStatusCode() === 200;
+        } else {
+            return false;
+        }
     }
 
     /**
