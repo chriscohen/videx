@@ -194,7 +194,7 @@ class Scraper
 
         // Loop through each "package" DOM element on the page and process it. Since we are using a closure here, we
         // will make sure $packages is available inside the closure so we can retrieve data from it.
-        $this->getCrawler()->filter('div.package')->each(function ($element) use ($packages) {
+        $this->getCrawler()->filter('div.package')->each(function ($element) use (&$packages) {
             $package = new Package();
 
             /** @var Crawler $element */
