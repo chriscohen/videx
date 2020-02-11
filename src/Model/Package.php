@@ -96,7 +96,7 @@ class Package
         preg_match(self::PRICE_PATTERN, $price, $matches);
 
         // We need to cast to float to avoid TypeError. We avoid the ?? operator since otherwise we can't cast.
-        return $matches[1] ? (float) $matches[1] : null;
+        return isset($matches[1]) ? (float) $matches[1] : null;
     }
 
     /**
