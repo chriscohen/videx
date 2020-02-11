@@ -38,4 +38,39 @@ final class PackageTest extends TestCase
             [-1.69, '-£1.69'],
         ];
     }
+
+    /**
+     * Test that the replaceBrs() method is... replacing <br> and <br/> properly.
+     *
+     * @param string $input
+     * @param string $expected
+     *
+     * @dataProvider replaceBrsData
+     */
+    public function testReplaceBrs(string $input, string $expected)
+    {
+        $package = new Package();
+        $package->setDescription($input);
+
+        $this->assertEquals($expected, $package->getDescription());
+    }
+
+    public function replaceBrsData(): array
+    {
+        return [
+            ['<br>', ' '],
+            ['The quick brown fox<br>tripped over the lazy dog.', 'The quick brown fox tripped over the lazy dog.'],
+            ['<br/>', ' '],
+            ['The quick brown fox<br/>told off the lazy dog.', 'The quick brown fox told off the lazy dog.'],
+            // Test a string with both <br> and <br/>
+            [
+                'The lazy dog<br>told the quick brown fox<br/>to look where he was going.',
+                'The lazy dog told the quick brown fox to look where he was going.'
+            ],
+            // Test something with nothing but <br>s.
+            ['<br><br><br/><br/>', '    '],
+            // Test something with no <br>s.
+            ['The fox apologised and they went to the pub.', 'The fox apologised and they went to the pub.'],
+        ];
+    }
 }

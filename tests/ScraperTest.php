@@ -8,6 +8,7 @@ use ChrisCohen\Scraper\Scraper;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use InvalidArgumentException;
+use Symfony\Component\BrowserKit\Response;
 
 final class ScraperTest extends TestCase
 {
@@ -46,6 +47,47 @@ final class ScraperTest extends TestCase
         return [
             ['fakeurl', false],
             ['"£$^%$^$', false],
+        ];
+    }
+
+    // Make sure we get null by calling Scraper->scrapePackages() before we actually downloaded the page.
+    public function testScrapePackagesBeforeHttp()
+    {
+        $scraper = new Scraper('https://example.com');
+        $this->assertEquals(null, $scraper->scrapePackages());
+    }
+
+    /**
+     * Check that the succeeded() method gives the result we expect given different Response objects.
+     *
+     * @param int $statusCode
+     * @param bool $expected
+     *
+     * @dataProvider succeededResponsesData
+     */
+    public function testSucceededResponses(int $statusCode, bool $expected)
+    {
+        $response = new Response('', $statusCode);
+        $scraper = new Scraper('https://example.com');
+        $scraper->setResponse($response);
+
+        $this->assertEquals($expected, $scraper->succeeded());
+    }
+
+    public function succeededResponsesData(): array
+    {
+        return [
+            [200, true],
+            [206, false],
+            [404, false],
+            [418, false],
+            [420, false],
+            [500, false],
+            [503, false],
+            // Throw in some invalid response codes.
+            [-999, false],
+            [0, false],
+            [99999999, false],
         ];
     }
 }
