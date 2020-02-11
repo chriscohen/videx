@@ -66,7 +66,7 @@ class Package
      */
     public function setDescription(string $description): void
     {
-        $this->description = $description;
+        $this->description = $this->replaceBrs($description);
     }
 
     /**
@@ -75,6 +75,11 @@ class Package
     public function getPrice(): float
     {
         return $this->price;
+    }
+
+    public function formatPrice(): string
+    {
+        return $this->formatAsCurrency($this->getPrice());
     }
 
     /**
@@ -102,12 +107,55 @@ class Package
         return $this->discount;
     }
 
+    public function formatDiscount(): string
+    {
+        return $this->formatAsCurrency($this->getDiscount());
+    }
+
     /**
      * @param float $discount
      */
     public function setDiscount(float $discount): void
     {
         $this->discount = $discount;
+    }
+
+    /**
+     * Convert to an array suitable for use with json_encode().
+     *
+     * @return array
+     */
+    public function toJson(): array
+    {
+        return [
+            'title' => $this->getTitle(),
+            'description' => $this->getDescription(),
+            'price' => $this->formatPrice(),
+            'discount' => $this->formatDiscount(),
+        ];
+    }
+
+    /**
+     * Replace HTML newlines with regular space characters.
+     *
+     * @param string $input
+     * @return string
+     */
+    protected function replaceBrs(string $input): string
+    {
+        return str_replace(['<br>', '<br/>'], ' ', $input);
+    }
+
+    /**
+     * Format a float as a currency with 2 decimal places.
+     *
+     * @param float $input
+     * @param string $symbol
+     * @return string
+     */
+    protected function formatAsCurrency(float $input, string $symbol = '£'): string
+    {
+        return $symbol . number_format($input, 2);
     }
 
 }
