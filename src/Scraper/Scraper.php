@@ -207,14 +207,14 @@ class Scraper
             ));
 
             // Check that $price is not null before we set a price for the package.
-            if ($price) {
+            if (!empty($price)) {
                 $package->setPrice($price);
             }
 
             $discount = $package->getPriceFromString($this->getInnerContent($element, 'div.package-price > p'));
 
             // Check that $discount is not null before we set a discount on the package.
-            if ($discount) {
+            if (!empty($discount)) {
                 $package->setDiscount($discount);
             }
 
