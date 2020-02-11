@@ -155,7 +155,11 @@ class Package
      */
     protected function formatAsCurrency(float $input, string $symbol = '£'): string
     {
-        return $symbol . number_format($input, 2);
+        if ($input >= 0) {
+            return $symbol . number_format($input, 2);
+        } else {
+            return '-' . $symbol . abs(number_format($input, 2));
+        }
     }
 
 }
