@@ -27,8 +27,8 @@ if (!$scraper->succeeded()) {
 }
 
 // Find packages on the page.
-$packages = $scraper->scrapePackages();
-
+$scraper->scrapePackages();
+$packages = $scraper->getPackagesByPrice();
 $json = [];
 
 foreach ($packages as $package) {

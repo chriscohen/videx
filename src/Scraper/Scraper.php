@@ -127,6 +127,30 @@ class Scraper
     }
 
     /**
+     * Sort and return packages in descending price order.
+     *
+     * Note that this will not sort the internal $packages property on this class.
+     *
+     * @return Package[]
+     */
+    public function getPackagesByPrice(): array
+    {
+        // Copy of array to avoid changing the original.
+        $packages = $this->getPackages();
+
+        // Custom sort function within closure.
+        usort($packages, function (Package $a, Package $b) {
+            if ($a->getPrice() == $b->getPrice()) {
+                return 0;
+            }
+
+            return ($a->getPrice() > $b->getPrice() ? -1 : 1);
+        });
+
+        return $packages;
+    }
+
+    /**
      * No array type checking in PHP yet, so we'll implement it ourselves.
      *
      * @param Package[] $packages
