@@ -140,11 +140,11 @@ class Scraper
 
         // Custom sort function within closure.
         usort($packages, function (Package $a, Package $b) {
-            if ($a->getPrice() == $b->getPrice()) {
+            if ($a->getAnnualPrice() == $b->getAnnualPrice()) {
                 return 0;
             }
 
-            return ($a->getPrice() > $b->getPrice() ? -1 : 1);
+            return ($a->getAnnualPrice() > $b->getAnnualPrice() ? -1 : 1);
         });
 
         return $packages;

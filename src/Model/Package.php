@@ -38,6 +38,13 @@ class Package
     protected $discount = 0.0;
 
     /**
+     * The number of months for this package. An annual package would have a value of 12, for example.
+     *
+     * @var int
+     */
+    protected $months = 1;
+
+    /**
      * @return string
      */
     public function getTitle(): string
@@ -67,6 +74,13 @@ class Package
     public function setDescription(string $description): void
     {
         $this->description = $this->replaceBrs($description);
+
+        // Work out if the package is monthly or yearly.
+        $description = strtolower($description);
+
+        if (strpos($description, 'per year') !== false) {
+            $this->setMonths(12);
+        }
     }
 
     /**
@@ -75,6 +89,17 @@ class Package
     public function getPrice(): float
     {
         return $this->price;
+    }
+
+    /**
+     * Work out a price for a 12-month period.
+     *
+     * @return float
+     */
+    public function getAnnualPrice(): float
+    {
+        $ratio = $this->getMonths() / 12;
+        return $this->getPrice() / $ratio;
     }
 
     public function formatPrice(): string
@@ -118,6 +143,20 @@ class Package
     public function setDiscount(float $discount): void
     {
         $this->discount = $discount;
+    }
+
+    public function getMonths(): int
+    {
+        return $this->months;
+    }
+
+    public function setMonths(int $months): void
+    {
+        if ($months < 0) {
+            $months = 1;
+        }
+
+        $this->months = $months;
     }
 
     /**
